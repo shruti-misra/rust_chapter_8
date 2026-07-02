@@ -5,11 +5,37 @@
 use std::io;
 use std::collections::HashMap;
 
-fn add_to_map(name: &str, department: &str, directory: &mut HashMap<String, Vec<String>>) {
+fn add_to_map(words: &Vec<&str>, directory: &mut HashMap<String, Vec<String>>) {
+
+    if words.len() != 4 {
+        return println!("Add a valid statement like 'Add Sally to Engineering'");
+    }
+    let name = words[1];
+    let department = words[3];
+    println!("{:?}, {:?}", name, department);
     directory
-        .entry(department.to_string().to_uppercase())
+        .entry(department.to_string().to_lowercase())
         .or_default()
         .push(name.to_string());
+}
+
+fn list_department(words: &Vec<&str>, directory: &mut HashMap<String, Vec<String>>) {
+
+    let department = words[1];
+    let people: &mut Vec<String> = directory.get_mut(department).unwrap();
+    people.sort();
+    println!("{:?}", people);
+
+}
+
+fn get_all_people(directory: &mut HashMap<String, Vec<String>>) {
+
+      for (key, value) in directory {
+        value.sort();
+        println!("{key}: {:?}", value);
+    }
+
+
 }
 
 fn main() {
@@ -28,22 +54,28 @@ fn main() {
 
         //Read user input
         io::stdin().read_line(&mut user_input).expect("Failed to real input");
+        let user_input_lower = user_input.to_lowercase();
+        let words: Vec<&str> = user_input_lower.trim().split_whitespace().collect();
+        let search_term: &str = words[0];
 
-        let words: Vec<&str> = user_input.trim().split_whitespace().collect();
-        if words.len() != 4 {
-            return println!("Add a valid statement like 'Add Sally to Engineering'");
-        }
-        
-        else {
 
-            let name = words[1];
-            let department = words[3];
-
-            println!("{:?}, {:?}", name, department);
-            add_to_map(&name, &department, &mut directory);
-            println!("{:?}", directory)
-
-            //Add name and department to hashmap
+        match search_term {
+            "add" => {
+                add_to_map(&words, &mut directory);
+                println!("{:?}", directory);
+            }
+            "list" => {
+                list_department(&words, &mut directory);
+            }
+            "get" => {
+                get_all_people(&mut directory);
+            }
+            "quit" => {
+                break;
+            }
+            _ => {
+                println!("Command not recognized");
+            }
         }
     }
 }
